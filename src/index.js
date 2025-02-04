@@ -13,8 +13,7 @@ const userRoutes = require("./routes/userRoutes");
 const notesRoutes = require("./routes/notesRoutes");
 // init mongoose
 const mongoose = require("mongoose");
-const cors = require("cors")
-//cors init
+const cors = require("cors")//cors init
 app.use(cors());
 //receive all data as json format
 app.use(express.json());
