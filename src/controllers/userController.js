@@ -1,8 +1,7 @@
 const userModel = require("../models/user");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const user = require("../models/user");
-const SECRET_KEY = "NoteAPI";
+const SECRET = process.env.SECRET_KEY;
 
 const signup = async (req,res) => {
     //check exiting user
@@ -27,7 +26,7 @@ const signup = async (req,res) => {
 
 
     // Token Generate
-    const token = jwt.sign({email:result.email,id: result._id,},SECRET_KEY)
+    const token = jwt.sign({email:result.email,id: result._id,},SECRET)
     return res.status(201).json({user:result,token:token});
 
     }catch(error){
@@ -51,7 +50,7 @@ const signin = async (req,res)=>{
         if(!matchPassword){
             return res.status(400).json({message:"Invalid credentials"});
         }
-        const token = jwt.sign({email:exitingUser.email,id: exitingUser._id,},SECRET_KEY)
+        const token = jwt.sign({email:exitingUser.email,id: exitingUser._id,},SECRET)
         return res.status(200).json({user:exitingUser,token:token});
 
     }catch(error){

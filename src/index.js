@@ -2,8 +2,10 @@
 const express = require("express");
 const app = express();
 
-//init port number
-const portNumber = 4000;
+const dotenv = require("dotenv");
+//init dotenv
+dotenv.config();
+
 //get quotes file
 const quotes = require("./data/quotes.json");
 //router setup
@@ -11,9 +13,14 @@ const userRoutes = require("./routes/userRoutes");
 const notesRoutes = require("./routes/notesRoutes");
 // init mongoose
 const mongoose = require("mongoose");
+const cors = require("cors")
+//cors init
+app.use(cors());
 //receive all data as json format
 app.use(express.json());
 
+//init port number
+const portNumber = process.env.PORT || 4000;
 //add middle ware to view all the request
 app.use((req, res, next) => {
   console.log("HTTP Method == " + req.method + ", URL = " + req.url);
@@ -25,7 +32,7 @@ app.use("/note", notesRoutes);
 
 app.get("/", (req, res) => {
   console.log("call base url");
-  return res.send("Hello");
+  return res.send("Note Api From Imran");
 });
 
 app.get("/quotes", (req, res) => {
@@ -41,7 +48,7 @@ app.get("/random", (req, res) => {
 });
 //connect mongoes
 mongoose
-  .connect("mongodb://localhost:27017/note")
+  .connect(process.env.MONGO_URL)
   .then(() => {
     console.log("MongoDB Connected Successfully");
     //listen server

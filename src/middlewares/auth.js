@@ -1,13 +1,12 @@
 const jwt = require("jsonwebtoken");
-const { model } = require("mongoose");
-const SECRET_KEY = "NoteAPI";
+const SECRET = process.env.SECRET_KEY;
 
 const auth = (req, res, next) => {
   try {
     let token = req.headers.authorization;
     if (token) {
       token = token.split(" ")[1];
-      let user = jwt.verify(token, SECRET_KEY);
+      let user = jwt.verify(token, SECRET);
       req.userId = user.id;
     } else {
       console.log("Token got empty");
