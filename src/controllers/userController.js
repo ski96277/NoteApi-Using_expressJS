@@ -52,7 +52,7 @@ const signin = async (req,res)=>{
             return res.status(400).json({message:"Invalid credentials"});
         }
         const token = jwt.sign({email:exitingUser.email,id: exitingUser._id,},SECRET_KEY)
-        return res.status(201).json({user:exitingUser,token:token});
+        return res.status(200).json({user:exitingUser,token:token});
 
     }catch(error){
         console.log("got error on login "+error);
@@ -61,7 +61,18 @@ const signin = async (req,res)=>{
 
 
 }
+//update user name 
+const updateProfile = async (req,res)=>{
+    const {username} = req.body;
+    const userId = req.userId;
+    try{
+        const updatedUser = await userModel.findByIdAndUpdate(userId,{userName:username},{new:true});
+        return res.status(200).json({user:updatedUser});
+    }catch(error){
+        console.log("got error on update profile "+error);
+        return res.status(500).json({message:"Update profile got an error"});
+    }
+}
 
 
-
-module.exports = {signin,signup};
+module.exports = {signin,signup,updateProfile};
