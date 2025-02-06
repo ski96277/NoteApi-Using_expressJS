@@ -80,13 +80,11 @@ const sentOTP = async (req, res) => {
 
   //if already have some otp collection for this user delete it
 
-  try{
-    await otpModel.deleteMany({userId: userId});
+  try {
+    await otpModel.deleteMany({ userId: userId });
     console.log("Previous OTP collection are deleted");
-  }catch(error){
-
-    console.log("Previous OTP collection are not deleted error is "+error);
-
+  } catch (error) {
+    console.log("Previous OTP collection are not deleted error is " + error);
   }
 
   try {
@@ -126,19 +124,18 @@ const changePassword = async (req, res) => {
   //get otp information
   let otpInformation;
 
-  try{
-     otpInformation = await otpModel.findOne({ userId: userId, used: false });
-  
+  try {
+    otpInformation = await otpModel.findOne({ userId: userId, used: false });
+
     if (otpInformation.used) {
       return res.status(400).json({ message: "OTP already used" });
     }
-  
+
     if (parseInt(otp) !== otpInformation.otp) {
       return res.status(400).json({ message: "OTP doesn't match" });
     }
-  }catch(error){
-
-   return res.status(400).json({message:"No active OTP found"});
+  } catch (error) {
+    return res.status(400).json({ message: "No active OTP found" });
   }
   //get user information
   const userInformation = await userModel.findOne({ _id: userId });
@@ -180,4 +177,55 @@ const changePassword = async (req, res) => {
   return res.status(200).json({ message: "Password updated." });
 };
 
-module.exports = { signin, signup, updateProfile, sentOTP, changePassword };
+//forgot password
+const forgotPassword = async (req, res) => {
+  const userId = req.userId;
+  const { email, otp, password } = req.body;
+  let otpInformation;
+  //OTP validation check
+  try {
+    otpInformation = await otpModel.findOne({ userId: userId, used: false });
+
+    if (!otpInformation) {
+      return res.status(400).json({ message: "No OTP found for this user" });
+    }
+
+    if (parseInt(otp) !== otpInformation.otp) {
+      return res.status(400).json({ message: "OTP does not match" });
+    }
+  } catch (error) {
+    console.log("otp fetch and match got an error " + error);
+    return res.status(400).json({ message: "No OTP found for this user" });
+  }
+
+  //get user information
+  let userInformation;
+
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    userInformation = await userModel.findByIdAndUpdate(userId, {
+      password: hashedPassword,
+    });
+    if (!userInformation) {
+      res.status(400).json({ message: "password update got an error" });
+    }
+  } catch (error) {
+    return res.status(400).json({ message: "password update got an error" });
+  }
+  //update otp collection
+  try {
+    await otpModel.findByIdAndUpdate(
+      otpInformation._id,
+      {
+        used: true,
+      },
+      { new: true }
+    );
+  } catch (error) {
+    console.log("otp update got an error");
+  }
+
+  res.status(200).json({message: "Password update complete"})
+};
+
+module.exports = { signin, signup, updateProfile, sentOTP, changePassword,forgotPassword };
